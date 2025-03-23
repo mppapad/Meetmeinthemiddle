@@ -3,9 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meet me in the Middle</title>
+    <style>
+        body {
+            margin:0%;
+        }
+        /* Wrapper for the responsive iframe */
+        .pdf-wrapper {
+            position: relative;
+            width: 100%;
+            padding-bottom: 75%; /* 4:3 aspect ratio (adjust as needed) */
+            height: 0;
+            overflow: hidden;
+        }
+
+        .pdf-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100dvh;
+        }
+    </style>
 </head>
-<body style="margin: 0;">
-<iframe src="web/viewer.html?file=index.pdf" style="width:100%; height:100vh;" frameborder="0"></iframe>
+<body>
+    <!-- The wrapper makes the iframe responsive -->
+    <div class="pdf-wrapper">
+        <iframe src="https://drive.google.com/file/d/1zMNPn-o1QnypupHWC1NiF0FxpSSgccNZ/preview" width="100%" height="100%"></iframe>
+    </div>
+
 </body>
 </html>
