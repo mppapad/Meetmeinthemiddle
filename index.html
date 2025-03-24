@@ -10,6 +10,7 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
+            background-color: #272727;
         }
         
         /* Wrapper for the responsive iframe */
@@ -42,7 +43,16 @@
             }
         }
     </style>
+    <script>
+        // Check if the page has already been refreshed
+        if (!sessionStorage.getItem("reloaded")) {
+            sessionStorage.setItem("reloaded", "true"); // Mark as refreshed
+            location.reload(); // Refresh the page
+        }
+    </script>
 </head>
+
+
 <body>
     <!-- The wrapper makes the iframe responsive -->
     <div class="pdf-wrapper">
