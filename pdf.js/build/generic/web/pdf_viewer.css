@@ -63,16 +63,16 @@
   display: none;
 }
 .annotationLayer {
-  display: none;
+  display: hidden;
 }
 .textLayer {
-  display: none;
+  display: hidden;
 }
 .verticalToolbarSeparator {
-  display: none;
+  display: hidden;
 }
 .hiddenMediumView {
-  display: none;
+  display: hidden;
 }
 .pdfViewer {
   /* Define this variable here and not in :root to avoid to reflow all the UI
