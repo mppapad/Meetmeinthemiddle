@@ -62,7 +62,18 @@
   height: 0;
   display: none;
 }
-
+.annotationLayer {
+  display: none;
+}
+.textLayer {
+  display: none;
+}
+.verticalToolbarSeparator {
+  display: none;
+}
+.hiddenMediumView {
+  display: none;
+}
 .pdfViewer {
   /* Define this variable here and not in :root to avoid to reflow all the UI
      when scaling (see #15929). */
