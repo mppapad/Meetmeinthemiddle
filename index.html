@@ -1,62 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <title>Meet me in the Mid|dle</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #272727;
-        }
-        
-        /* Wrapper for the responsive iframe */
-        .pdf-wrapper {
-            position: relative;
-            width: 100%;
-            height: 100vh; /* Use viewport height for desktop */
-        }
-        
-        .pdf-wrapper iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        
-        /* Full screen for mobile and tablet devices */
-        @media (max-width: 1024px) {
-            .pdf-wrapper {
-                height: 100vh; /* Standard viewport height */
-            }
-            
-            /* For iOS Safari and other mobile browsers that support dvh */
-            @supports (height: 100dvh) {
-                .pdf-wrapper {
-                    height: 100dvh; /* Dynamic viewport height - accounts for browser UI */
-                }
-            }
-        }
-    </style>
-    <script>
-        // Check if the page has already been refreshed
-        if (!sessionStorage.getItem("reloaded")) {
-            sessionStorage.setItem("reloaded", "true"); // Mark as refreshed
-            location.reload(); // Refresh the page
-        }
-    </script>
-</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico" />
+    <title>Meet me in the Middle</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script src="./notLoadingFix.js"></script>
+  </head>
 
-
-<body>
+  <body>
     <!-- The wrapper makes the iframe responsive -->
     <div class="pdf-wrapper">
-        <iframe src="https://docs.google.com/gview?url=https://drive.google.com/uc?id=1jFjZXROyQpxHe1jo0uPX5S3vIrW40T2G&embedded=true"></iframe>
+      <iframe
+        src="https://docs.google.com/gview?url=https://drive.google.com/uc?id=1jFjZXROyQpxHe1jo0uPX5S3vIrW40T2G&embedded=true"
+      ></iframe>
     </div>
-</body>
+  </body>
 </html>

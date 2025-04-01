@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PDF Viewer</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+      iframe {
+        width: 100vw;
+        height: 100vh;
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <iframe
+      id="pdfViewer"
+      src="https://mozilla.github.io/pdf.js/web/viewer.html?file=https://raw.githubusercontent.com/mppapad/Meetmeinthemiddle/main/assets/documents/mmitmproject.pdf"
+    >
+    </iframe>
+  </body>
+</html>
