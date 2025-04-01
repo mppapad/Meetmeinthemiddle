@@ -253,7 +253,12 @@ body {
     cursor: wait;
   }
 }
-
+.annotationLayer {
+  display: none;
+}
+.textLayer {
+  display: none;
+}
 #editorModeButtons,
 #editorModeSeparator,
 #printButton,
