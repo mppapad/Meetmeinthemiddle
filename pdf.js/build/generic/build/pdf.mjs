@@ -369,7 +369,8 @@ const OPS = {
   paintSolidColorImageMask: 90,
   constructPath: 91,
   setStrokeTransparent: 92,
-  setFillTransparent: 93
+  setFillTransparent: 93,
+  rawFillPath: 94
 };
 const DrawOPS = {
   moveTo: 0,
@@ -7299,7 +7300,6 @@ const MIN_FONT_SIZE = 16;
 const MAX_FONT_SIZE = 100;
 const EXECUTION_TIME = 15;
 const EXECUTION_STEPS = 10;
-const MAX_SIZE_TO_COMPILE = 1000;
 const FULL_CHUNK_HEIGHT = 16;
 const SCALE_MATRIX = new DOMMatrix();
 const XY = new Float32Array(2);
@@ -7462,138 +7462,6 @@ function drawImageAtIntegerCoords(ctx, srcImg, srcX, srcY, srcW, srcH, destX, de
   const scaleX = Math.hypot(a, b);
   const scaleY = Math.hypot(c, d);
   return [scaleX * destW, scaleY * destH];
-}
-function compileType3Glyph(imgData) {
-  const {
-    width,
-    height
-  } = imgData;
-  if (width > MAX_SIZE_TO_COMPILE || height > MAX_SIZE_TO_COMPILE) {
-    return null;
-  }
-  const POINT_TO_PROCESS_LIMIT = 1000;
-  const POINT_TYPES = new Uint8Array([0, 2, 4, 0, 1, 0, 5, 4, 8, 10, 0, 8, 0, 2, 1, 0]);
-  const width1 = width + 1;
-  const points = new Uint8Array(width1 * (height + 1));
-  let i, j, j0;
-  const lineSize = width + 7 & ~7;
-  const data = new Uint8Array(lineSize * height);
-  let pos = 0;
-  for (const elem of imgData.data) {
-    let mask = 128;
-    while (mask > 0) {
-      data[pos++] = elem & mask ? 0 : 255;
-      mask >>= 1;
-    }
-  }
-  let count = 0;
-  pos = 0;
-  if (data[pos] !== 0) {
-    points[0] = 1;
-    ++count;
-  }
-  for (j = 1; j < width; j++) {
-    if (data[pos] !== data[pos + 1]) {
-      points[j] = data[pos] ? 2 : 1;
-      ++count;
-    }
-    pos++;
-  }
-  if (data[pos] !== 0) {
-    points[j] = 2;
-    ++count;
-  }
-  for (i = 1; i < height; i++) {
-    pos = i * lineSize;
-    j0 = i * width1;
-    if (data[pos - lineSize] !== data[pos]) {
-      points[j0] = data[pos] ? 1 : 8;
-      ++count;
-    }
-    let sum = (data[pos] ? 4 : 0) + (data[pos - lineSize] ? 8 : 0);
-    for (j = 1; j < width; j++) {
-      sum = (sum >> 2) + (data[pos + 1] ? 4 : 0) + (data[pos - lineSize + 1] ? 8 : 0);
-      if (POINT_TYPES[sum]) {
-        points[j0 + j] = POINT_TYPES[sum];
-        ++count;
-      }
-      pos++;
-    }
-    if (data[pos - lineSize] !== data[pos]) {
-      points[j0 + j] = data[pos] ? 2 : 4;
-      ++count;
-    }
-    if (count > POINT_TO_PROCESS_LIMIT) {
-      return null;
-    }
-  }
-  pos = lineSize * (height - 1);
-  j0 = i * width1;
-  if (data[pos] !== 0) {
-    points[j0] = 8;
-    ++count;
-  }
-  for (j = 1; j < width; j++) {
-    if (data[pos] !== data[pos + 1]) {
-      points[j0 + j] = data[pos] ? 4 : 8;
-      ++count;
-    }
-    pos++;
-  }
-  if (data[pos] !== 0) {
-    points[j0 + j] = 4;
-    ++count;
-  }
-  if (count > POINT_TO_PROCESS_LIMIT) {
-    return null;
-  }
-  const steps = new Int32Array([0, width1, -1, 0, -width1, 0, 0, 0, 1]);
-  const path = new Path2D();
-  const {
-    a,
-    b,
-    c,
-    d,
-    e,
-    f
-  } = new DOMMatrix().scaleSelf(1 / width, -1 / height).translateSelf(0, -height);
-  for (i = 0; count && i <= height; i++) {
-    let p = i * width1;
-    const end = p + width;
-    while (p < end && !points[p]) {
-      p++;
-    }
-    if (p === end) {
-      continue;
-    }
-    let x = p % width1;
-    let y = i;
-    path.moveTo(a * x + c * y + e, b * x + d * y + f);
-    const p0 = p;
-    let type = points[p];
-    do {
-      const step = steps[type];
-      do {
-        p += step;
-      } while (!points[p]);
-      const pp = points[p];
-      if (pp !== 5 && pp !== 10) {
-        type = pp;
-        points[p] = 0;
-      } else {
-        type = pp & 0x33 * type >> 4;
-        points[p] &= type >> 2 | type << 2;
-      }
-      x = p % width1;
-      y = p / width1 | 0;
-      path.lineTo(a * x + c * y + e, b * x + d * y + f);
-      if (!points[p]) {
-        --count;
-      }
-    } while (p0 !== p);
-    --i;
-  }
-  return path;
 }
 class CanvasExtraState {
   constructor(width, height) {
@@ -7859,7 +7727,6 @@ class CanvasGraphics {
     this.canvasFactory = canvasFactory;
     this.filterFactory = filterFactory;
     this.groupStack = [];
-    this.processingType3 = null;
     this.baseTransform = null;
     this.baseTransformStack = [];
     this.groupLevel = 0;
@@ -8443,6 +8310,9 @@ class CanvasGraphics {
   endPath(path) {
     this.consumePath(path);
   }
+  rawFillPath(path) {
+    this.ctx.fill(path);
+  }
   clip() {
     this.pendingClip = NORMAL_CLIP;
   }
@@ -8459,7 +8329,6 @@ class CanvasGraphics {
     const paths = this.pendingTextPaths;
     const ctx = this.ctx;
     if (paths === undefined) {
-      ctx.beginPath();
       return;
     }
     const newPath = new Path2D();
@@ -8474,7 +8343,6 @@ class CanvasGraphics {
       newPath.addPath(path, new DOMMatrix(transform).preMultiplySelf(invTransf).translate(x, y).scale(fontSize, -fontSize));
     }
     ctx.clip(newPath);
-    ctx.beginPath();
     delete this.pendingTextPaths;
   }
   setCharSpacing(spacing) {
@@ -8813,7 +8681,6 @@ class CanvasGraphics {
       if (!operatorList) {
         warn(`Type3 character "${glyph.operatorListId}" is not available.`);
       } else if (this.contentVisible) {
-        this.processingType3 = glyph;
         this.save();
         ctx.scale(fontSize, fontSize);
         ctx.transform(...fontMatrix);
@@ -8826,12 +8693,12 @@ class CanvasGraphics {
       current.x += width * textHScale;
     }
     ctx.restore();
-    this.processingType3 = null;
   }
   setCharWidth(xWidth, yWidth) {}
   setCharWidthAndBounds(xWidth, yWidth, llx, lly, urx, ury) {
-    this.ctx.rect(llx, lly, urx - llx, ury - lly);
-    this.ctx.clip();
+    const clip = new Path2D();
+    clip.rect(llx, lly, urx - llx, ury - lly);
+    this.ctx.clip(clip);
     this.endPath();
   }
   getColorN_Pattern(IR) {
@@ -8926,11 +8793,11 @@ class CanvasGraphics {
     }
     this.baseTransform = getCurrentTransform(this.ctx);
     if (bbox) {
-      const width = bbox[2] - bbox[0];
-      const height = bbox[3] - bbox[1];
-      this.ctx.rect(bbox[0], bbox[1], width, height);
       this.current.updateRectMinMax(getCurrentTransform(this.ctx), bbox);
-      this.clip();
+      const [x0, y0, x1, y1] = bbox;
+      const clip = new Path2D();
+      clip.rect(x0, y0, x1 - x0, y1 - y0);
+      this.ctx.clip(clip);
       this.endPath();
     }
   }
@@ -9074,9 +8941,9 @@ class CanvasGraphics {
       } else {
         resetCtxToDefault(this.ctx);
         this.endPath();
-        this.ctx.rect(rect[0], rect[1], width, height);
-        this.ctx.clip();
-        this.ctx.beginPath();
+        const clip = new Path2D();
+        clip.rect(rect[0], rect[1], width, height);
+        this.ctx.clip(clip);
       }
     }
     this.current = new CanvasExtraState(this.ctx.canvas.width, this.ctx.canvas.height);
@@ -9100,16 +8967,6 @@ class CanvasGraphics {
     img = this.getObject(img.data, img);
     img.count = count;
     const ctx = this.ctx;
-    const glyph = this.processingType3;
-    if (glyph) {
-      if (glyph.compiled === undefined) {
-        glyph.compiled = compileType3Glyph(img);
-      }
-      if (glyph.compiled) {
-        ctx.fill(glyph.compiled);
-        return;
-      }
-    }
     const mask = this._createMaskCanvas(img);
     const maskCanvas = mask.canvas;
     ctx.save();
@@ -9337,7 +9194,6 @@ class CanvasGraphics {
       this.pendingClip = null;
     }
     this.current.startNewPathAndClipBox(this.current.clipBox);
-    ctx.beginPath();
   }
   getSinglePixelWidth() {
     if (!this._cachedGetSinglePixelWidth) {
