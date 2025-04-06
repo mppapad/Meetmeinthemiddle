@@ -1,11 +1,54 @@
-body,
-html {
-  margin: 0;
-  height: 100%;
-  overflow: hidden;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
-iframe {
-  width: 100vw;
-  height: 100vh;
-  border: none;
+html, body {
+    height: 100%;
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+}
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #F8F8F8;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+}
+.container {
+    max-width: 100%;
+    padding: 20px;
+    transform: translateY(-2vh); /* Slight adjustment for visual balance with browser UI */
+}
+img {
+    max-width: 150px;
+    height: auto;
+    margin-bottom: 20px;
+}
+h1 {
+    font-size: clamp(20px, 5vw, 24px);
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+}
+p {
+    font-size: clamp(14px, 4vw, 16px);
+    color: #666;
+    margin-bottom: 10px;
+}
+a {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: clamp(14px, 4vw, 16px);
+    color: #D8820B;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 8px 16px;
+}
+a:hover {
+    text-decoration: underline;
 }
